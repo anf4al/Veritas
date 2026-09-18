@@ -348,6 +348,59 @@ Expiration Date: April 30, 2026 (Expiring within 90 days)
 This agreement shall terminate on April 30, 2026. Notice of non-renewal must be delivered forty-five (45) days prior to the expiration date."""
     })
 
+    # 9. Employee Handbook 2026
+    docs.append({
+        "title": "Employee Handbook 2026",
+        "filename": "employee_handbook_2026.md",
+        "document_type": "handbook",
+        "department": "HR",
+        "version": "4.0",
+        "effective_date": "2026-01-01",
+        "confidentiality": "internal",
+        "content": """# Asterion Technologies Comprehensive Employee Handbook 2026
+Document ID: AST-HR-HBK-2026-001
+Effective Date: January 1, 2026
+Classification: INTERNAL
+
+## Chapter 1: Introduction and Core Culture
+Welcome to Asterion Technologies. This handbook outlines organizational policies, professional standards, and employment benefits for all staff.
+
+## Chapter 2: Work Schedules and Hybrid Working (WFH)
+Asterion Technologies operates on a flexible hybrid work model. In accordance with the Work From Home Policy 2026, eligible employees work on-site at their assigned regional office two (2) core days per week (Tuesday and Thursday), and are authorized to work from home (WFH) up to three (3) days per week. New hires receive a $1,200 home office workstation stipend and a $75 monthly broadband allowance.
+
+## Chapter 3: Paid Time Off, Annual Leave, and Holidays
+### 3.1 Annual Leave (Vacation)
+Full-time employees receive twenty-two (22) days of paid annual leave per calendar year, accruing monthly at a rate of 1.83 days.
+
+### 3.2 Public and Company Holidays
+Asterion Technologies recognizes eleven (11) paid statutory holidays each calendar year:
+1. New Year's Day (January 1)
+2. Martin Luther King Jr. Day (Third Monday in January)
+3. Memorial Day (Last Monday in May)
+4. Juneteenth National Independence Day (June 19)
+5. Independence Day (July 4)
+6. Labor Day (First Monday in September)
+7. Thanksgiving Day (Fourth Thursday in November)
+8. Day after Thanksgiving (Black Friday)
+9. Christmas Eve (December 24)
+10. Christmas Day (December 25)
+11. One (1) Personal Floating Holiday chosen by the employee.
+
+In total, employees receive 11 paid holidays in addition to their 22 annual leave days.
+
+### 3.3 Carry-Forward Rules
+Employees may carry forward a maximum of eight (8) unused annual leave days or holiday credits into the next calendar year. Carried-over days must be utilized prior to March 31.
+
+### 3.4 Sick Leave
+Employees are provided twelve (12) paid sick leave days per annum for personal illness, medical appointments, or immediate family care.
+
+## Chapter 4: Business Expenses and Travel Reimbursement
+Per the Reimbursement Policy 2026, daily domestic travel per diem is $95. Economy air travel is mandatory for flights under six hours. Expense reports must be submitted within thirty (30) days of travel.
+
+## Chapter 5: Security and Confidentiality
+All corporate data must be handled according to the Information Security Policy 2026. Hardware MFA is required on all workstations."""
+    })
+
     return docs
 
 def generate_bulk_documents(company: Dict[str, Any], count: int, starting_index: int = 1) -> List[Dict[str, Any]]:
@@ -394,10 +447,10 @@ def generate_bulk_documents(company: Dict[str, Any], count: int, starting_index:
         v_num = f"{random.randint(1, 3)}.{random.randint(0, 5)}"
         conf = random.choice(["internal", "internal", "public", "confidential"])
 
-        title = f"{title_base} {year}"
-        filename = f"{title.lower().replace(' ', '_')}.md"
+        title = f"{title_base} Ref-{idx:03d} ({year})"
+        safe_base = title_base.lower().replace(' ', '_').replace('-', '_')
+        filename = f"{safe_base}_{idx:03d}_{year}.md"
 
-        # Generate realistic multi-section content
         content = f"""# {title}
 Organization: {comp_name}
 Reference Code: {slug}-{dept[:3].upper()}-{year}-{idx:03d}
@@ -419,6 +472,7 @@ All employees, contractors, and affiliates within the {dept} department must str
 - Department Leadership: Accountable for resource allocation and policy enforcement.
 - Operational Staff: Responsible for daily execution according to standard checklists.
 - Compliance Reviewers: Empowered to inspect operational logs and flag exceptions.
+- Internal Audit: Authorized to review all departmental records and compliance reports.
 
 ## Section 4: Document Governance and Historical Versioning
 This procedure is subject to annual review by the {dept} governance council. Superseded versions must be archived in compliance with the corporate data retention standard."""
@@ -448,11 +502,11 @@ def generate_all_seed_data():
         company_docs: List[Dict[str, Any]] = []
 
         if comp_slug == "asterion":
-            # Core 12 connected docs
+            # Core 15 connected docs
             core = generate_asterion_core_docs()
             company_docs.extend(core)
-            # 48 bulk docs to reach exactly 60
-            bulk = generate_bulk_documents(comp, count=48, starting_index=13)
+            # 48 bulk docs to reach 63 (> 60 requirement)
+            bulk = generate_bulk_documents(comp, count=48, starting_index=16)
             company_docs.extend(bulk)
         else:
             # 60 docs for Northstar / Meridian

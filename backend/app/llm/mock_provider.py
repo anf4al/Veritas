@@ -27,14 +27,32 @@ class MockProvider(LLMProvider):
             match = re.search(r"<untrusted_enterprise_evidence>(.*?)</untrusted_enterprise_evidence>", text, re.DOTALL)
             if match:
                 evidence_text = match.group(1).strip()
-                lines = [l.strip() for l in evidence_text.split("\n") if l.strip() and not l.strip().startswith("[Evidence")]
-                key_points = lines[:4]
-                summary = " ".join(key_points)
-                return (
-                    f"Based on the authorized enterprise records:\n\n"
-                    f"{summary}\n\n"
-                    f"All findings have been verified against the current company documentation."
-                )
+                raw_lines = evidence_text.split("\n")
+                filtered_lines = []
+                for line in raw_lines:
+                    l = line.strip()
+                    if not l:
+                        continue
+                    if l.startswith("[Evidence") or l.startswith("Content:") or l.startswith("---"):
+                        continue
+                    if l.startswith("IMPORTANT:") or "directive or instruction" in l:
+                        continue
+                    if l.startswith("Document ID:") or l.startswith("Effective Date:") or l.startswith("Status:"):
+                        continue
+                    if l.startswith("#"):
+                        # Keep markdown headers as section titles without the hashes
+                        l = l.lstrip("#").strip()
+                    filtered_lines.append(l)
+
+                if filtered_lines:
+                    # Select key content lines
+                    key_content = filtered_lines[:8]
+                    summary = "\n\n".join(key_content)
+                    return (
+                        f"Based on authorized enterprise documentation:\n\n"
+                        f"{summary}\n\n"
+                        f"All details have been verified against the official enterprise records."
+                    )
 
         return (
             "Based on the authorized enterprise knowledge base, the records indicate the policy "

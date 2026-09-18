@@ -1,7 +1,9 @@
 import time
 import asyncio
+import logging
 from typing import List, Dict, Any, Optional, Tuple, AsyncIterator
 from sqlalchemy.orm import Session
+
 from backend.app.models.user import User
 from backend.app.core.config import settings
 from backend.app.llm.factory import get_llm_provider
@@ -19,6 +21,43 @@ from backend.app.schemas.chat import (
     AgentStepInfo
 )
 from backend.app.observability.tracer import get_tracer
+
+logger = logging.getLogger("veritas.rag.orchestrator")
+
+def evaluate_evidence_sufficiency(query: str, top_evidence: List[Dict[str, Any]]) -> Tuple[str, str]:
+    """Evaluate evidence sufficiency returning (status, reason).
+    status: 'SUFFICIENT' | 'WEAK' | 'INSUFFICIENT'
+    """
+    if not top_evidence:
+        return "INSUFFICIENT", "No evidence chunks were retrieved or authorized for this query."
+
+    max_sim = max((float(e.get("similarity_score", 0.0)) for e in top_evidence), default=0.0)
+    max_rerank = max((float(e.get("rerank_score", 0.0)) for e in top_evidence), default=0.0)
+    chunk_count = len(top_evidence)
+
+    # Check comparison queries
+    q_lower = query.lower()
+    is_comparison = any(k in q_lower for k in ["compare", "changed between", "difference", "versus", " vs "])
+    if is_comparison:
+        versions = {str(e.get("version", "")) for e in top_evidence}
+        titles = {str(e.get("title", "")) for e in top_evidence}
+        has_multi_version = len(versions) > 1 or len(titles) > 1
+        if (max_sim >= 0.25 or max_rerank >= 0.25) and has_multi_version:
+            return "SUFFICIENT", f"Multi-source comparison evidence found ({', '.join(titles)}), max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}"
+        elif max_sim >= 0.20 or max_rerank >= 0.20:
+            return "WEAK", f"Comparison query with partial version representation ({', '.join(titles)}), max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}"
+
+    # General queries:
+    # A single strong chunk (sim >= 0.28 or rerank >= 0.30) is sufficient
+    # Or moderate similarity/rerank (max_sim >= 0.22 or max_rerank >= 0.22)
+    if max_sim >= 0.28 or max_rerank >= 0.30:
+        return "SUFFICIENT", f"Strong evidence identified (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}, count={chunk_count})"
+    elif max_sim >= 0.22 or max_rerank >= 0.22:
+        return "SUFFICIENT", f"Sufficient relevance identified (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}, count={chunk_count})"
+    elif max_sim >= 0.16 or max_rerank >= 0.16:
+        return "WEAK", f"Low confidence evidence (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}, count={chunk_count})"
+    else:
+        return "INSUFFICIENT", f"All evidence chunks below minimum thresholds (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f})"
 
 class AgentOrchestrator:
     def __init__(self, db: Session, user: User, tenant_id: str):
@@ -55,6 +94,8 @@ class AgentOrchestrator:
                 plan.append(("compare_documents", {"title_a": "Information Security Policy 2025", "title_b": "Information Security Policy 2026"}, "Comparing 2025 and 2026 Information Security Policies"))
             elif "reimbursement" in q_lower:
                 plan.append(("compare_documents", {"title_a": "Reimbursement Policy 2025", "title_b": "Reimbursement Policy 2026"}, "Comparing 2025 and 2026 Reimbursement Policies"))
+            elif "wfh" in q_lower or "work from home" in q_lower or "remote" in q_lower:
+                plan.append(("compare_documents", {"title_a": "Work From Home Policy 2025", "title_b": "Work From Home Policy 2026"}, "Comparing 2025 and 2026 Work From Home Policies"))
             else:
                 plan.append(("get_policy_versions", {"policy_name": query}, "Inspecting policy version history"))
             plan.append(("search_enterprise_knowledge", {"query": query, "top_k": 6}, "Retrieving comparison evidence"))
@@ -181,9 +222,21 @@ class AgentOrchestrator:
         evidence_list.sort(key=lambda e: e.get("rerank_score", 0.0), reverse=True)
         top_evidence = evidence_list[:settings.RERANK_TOP_K]
 
+        # Log candidate and rerank scores
+        logger.info(f"Incoming user query='{query}' | tenant_id='{self.tenant_id}' | role='{self.user.role}'")
+        logger.info(f"Retrieved candidate evidence count={len(evidence_list)}, top_k={len(top_evidence)}")
+        top_candidates_log = [
+            (e.get("title"), e.get("version"), round(float(e.get("similarity_score", 0.0)), 4), round(float(e.get("rerank_score", 0.0)), 4))
+            for e in top_evidence[:5]
+        ]
+        logger.info(f"Top 5 Evidence (title, version, sim, rerank): {top_candidates_log}")
+
+        sufficiency_status, sufficiency_reason = evaluate_evidence_sufficiency(query, top_evidence)
+        logger.info(f"Evidence Sufficiency Decision: [{sufficiency_status}] - {sufficiency_reason}")
+
         # Check evidence sufficiency
         insufficient = False
-        if not top_evidence or all(e.get("rerank_score", 0.0) < settings.SIMILARITY_THRESHOLD for e in top_evidence):
+        if sufficiency_status == "INSUFFICIENT":
             insufficient = True
             answer = INSUFFICIENT_EVIDENCE_MESSAGE
             citations = []
@@ -191,12 +244,18 @@ class AgentOrchestrator:
             # 3. LLM Generation span
             with self.tracer.span(trace_id, "llm_generate", {"provider": self.llm_provider.provider_name, "evidence_count": len(top_evidence)}):
                 rag_prompt = construct_rag_prompt(query, top_evidence)
+                if sufficiency_status == "WEAK":
+                    rag_prompt += "\nNote: Retrieved evidence has marginal confidence. If evidence is incomplete, clearly state the limitations."
+
+                llm_start = time.time()
                 answer = await self.llm_provider.generate(
                     prompt=rag_prompt,
                     system_prompt=VERITAS_SYSTEM_PROMPT,
                     max_tokens=1000,
                     temperature=0.0
                 )
+                llm_duration_ms = (time.time() - llm_start) * 1000.0
+                logger.info(f"LLM generation finished in {llm_duration_ms:.2f}ms using provider '{self.llm_provider.provider_name}' ({self.llm_provider.model_name})")
 
             # Build citations strictly from verified chunk metadata
             citations = []
@@ -252,3 +311,6 @@ class AgentOrchestrator:
             provider_used=self.llm_provider.provider_name,
             model_used=self.llm_provider.model_name
         )
+
+    # Alias for execute_query
+    run_query = execute_query

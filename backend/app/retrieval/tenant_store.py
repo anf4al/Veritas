@@ -1,6 +1,7 @@
 from typing import List, Optional, Callable
 from backend.app.retrieval.vector_store import get_vector_store, VectorPayload, VectorSearchResult
 from backend.app.retrieval.embeddings import get_embedding_provider
+from backend.app.retrieval.query_expander import expand_query_for_retrieval
 from backend.app.auth.permissions import check_document_access
 
 class TenantKnowledgeStore:
@@ -15,10 +16,15 @@ class TenantKnowledgeStore:
         self,
         query: str,
         user_role: str,
-        top_k: int = 40
+        top_k: int = 40,
+        use_expansion: bool = True
     ) -> List[VectorSearchResult]:
-        """Perform permission-aware vector search strictly within this tenant."""
-        query_vector = self.embedding_provider.embed_text(query)
+        """Perform permission-aware vector search strictly within this tenant.
+        Uses normalized/expanded query for embedding to improve semantic recall without
+        altering the original prompt passed to the LLM.
+        """
+        search_query = expand_query_for_retrieval(query) if use_expansion else query
+        query_vector = self.embedding_provider.embed_text(search_query)
 
         # Define document access filter callback
         def access_filter(payload: VectorPayload) -> bool:

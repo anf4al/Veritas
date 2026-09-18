@@ -70,7 +70,18 @@ DEMO_USERS = [
     }
 ]
 
-def seed_database():
+def seed_database(reset: bool = True):
+    from backend.app.models.evaluation import EvaluationRun, EvaluationResult
+    from backend.app.retrieval.vector_store import get_vector_store
+
+    if reset:
+        print("Dropping existing tables for clean seed...")
+        Base.metadata.drop_all(bind=engine)
+        # Clear vector store memory
+        store = get_vector_store()
+        store._tenants.clear()
+        store._matrices.clear()
+
     print("Recreating database schema...")
     Base.metadata.create_all(bind=engine)
     db: Session = SessionLocal()
@@ -122,12 +133,11 @@ def seed_database():
 
     db.commit()
 
-    # 3. Ensure seed documents exist on disk
-    meta_file = SEED_DIR / "metadata.json"
-    if not meta_file.exists():
-        print("Seed documents not found; generating demo dataset...")
-        generate_all_seed_data()
+    # 3. Ensure seed documents exist on disk and regenerate to include handbook
+    print("Regenerating demo dataset to ensure all current enterprise policies exist...")
+    generate_all_seed_data()
 
+    meta_file = SEED_DIR / "metadata.json"
     with open(meta_file, "r", encoding="utf-8") as f:
         doc_metadata = json.load(f)
 

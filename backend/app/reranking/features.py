@@ -36,17 +36,48 @@ def compute_bm25_lite(query_tokens: List[str], doc_tokens: List[str], avg_doc_le
             score += numerator / denominator
     return score / (len(query_tokens) + 1e-5)
 
-def compute_version_recency_score(version: str, effective_date: str = "") -> float:
+def compute_version_recency_score(version: str, effective_date: str = "", query: str = "") -> float:
     """Score currentness: 2026/v3.0 -> 1.0, 2025/v2.0 -> 0.6, 2024/v1.0 -> 0.3."""
-    score = 0.5
+    q_lower = query.lower()
     txt = f"{version} {effective_date}".lower()
+    
+    # Version comparison intent
+    if any(k in q_lower for k in ["compare", "changed between", "difference", "versus", " vs "]):
+        if any(y in txt for y in ["2025", "2026", "2.0", "3.0"]):
+            return 1.0
+        return 0.5
+
+    # Prior / previous version intent
+    if any(k in q_lower for k in ["previous", "prior", "former", "old", "superseded", "2025", "earlier", "past"]):
+        if "2025" in q_lower and "2026" not in q_lower:
+            if "2025" in txt or "2.0" in txt:
+                return 1.0
+            elif "2026" in txt or "3.0" in txt:
+                return 0.2
+        elif any(k in q_lower for k in ["previous", "prior", "former", "old", "superseded", "earlier", "past"]):
+            if "2025" in txt or "2.0" in txt or "superseded" in txt:
+                return 1.0
+            elif "2026" in txt or "3.0" in txt:
+                return 0.2
+
+    # Explicit current / latest intent
+    if any(k in q_lower for k in ["current", "latest", "now", "active", "present", "today"]):
+        if "2026" in txt or "3.0" in txt or "current" in txt:
+            return 1.0
+        elif "2025" in txt or "2.0" in txt:
+            return 0.15
+        elif "2024" in txt or "1.0" in txt or "outdated" in txt or "superseded" in txt:
+            return 0.05
+        return 0.3
+
+    # Default: favor current / latest
     if "2026" in txt or "3.0" in txt or "current" in txt:
-        score = 1.0
+        return 1.0
     elif "2025" in txt or "2.0" in txt:
-        score = 0.6
+        return 0.4
     elif "2024" in txt or "1.0" in txt or "outdated" in txt or "superseded" in txt:
-        score = 0.2
-    return score
+        return 0.2
+    return 0.4
 
 def compute_metadata_match(query: str, title: str, department: str, doc_type: str) -> float:
     """Check if query mentions title, department, or document type."""
@@ -85,17 +116,21 @@ def calculate_rerank_features(
     8: page_penalty (reciprocal of page)
     9: query_length_norm
     """
-    q_tokens = extract_tokens(query)
+    from backend.app.retrieval.query_expander import expand_query_for_retrieval
+
+    expanded_query = expand_query_for_retrieval(query)
+    q_tokens = extract_tokens(expanded_query)
     d_tokens = extract_tokens(chunk_text)
 
     lex_overlap = compute_lexical_overlap(q_tokens, d_tokens)
     bm25 = compute_bm25_lite(q_tokens, d_tokens)
-    meta_match = compute_metadata_match(query, title, department, doc_type)
-    recency = compute_version_recency_score(version, effective_date)
+    meta_match = compute_metadata_match(expanded_query, title, department, doc_type)
+    recency = compute_version_recency_score(version, effective_date, query)
 
     chunk_len_norm = min(1.0, math.log(len(d_tokens) + 1) / 7.0)
-    title_mention = 1.0 if any(w in query.lower() for w in title.lower().split() if len(w) > 3) else 0.0
-    dept_mention = 1.0 if department.lower() in query.lower() else 0.0
+    title_words = [w for w in title.lower().split() if len(w) > 3]
+    title_mention = 1.0 if any(w in expanded_query.lower() for w in title_words) else 0.0
+    dept_mention = 1.0 if department.lower() in expanded_query.lower() else 0.0
     page_pen = 1.0 / math.sqrt(max(1, page))
     q_len_norm = min(1.0, len(q_tokens) / 20.0)
 
@@ -111,3 +146,4 @@ def calculate_rerank_features(
         float(page_pen),
         float(q_len_norm)
     ]
+

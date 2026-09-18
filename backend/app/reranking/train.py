@@ -50,10 +50,16 @@ def train_reranker_model(training_data: List[Dict[str, Any]], save_path: Path = 
 
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    # Class balance / scale_pos_weight calculation
+    pos_count = int(np.sum(y_train == 1))
+    neg_count = int(np.sum(y_train == 0))
+    scale_pos_weight = float(neg_count / max(1, pos_count))
+
     model = xgb.XGBClassifier(
-        n_estimators=50,
+        n_estimators=80,
         max_depth=4,
-        learning_rate=0.1,
+        learning_rate=0.08,
+        scale_pos_weight=scale_pos_weight,
         eval_metric="logloss",
         random_state=42
     )
@@ -67,7 +73,10 @@ def train_reranker_model(training_data: List[Dict[str, Any]], save_path: Path = 
     return {
         "status": "trained",
         "samples": len(X),
-        "validation_accuracy": val_accuracy,
+        "positives": int(np.sum(y == 1)),
+        "negatives": int(np.sum(y == 0)),
+        "scale_pos_weight": round(scale_pos_weight, 4),
+        "validation_accuracy": round(val_accuracy, 4),
         "model_file": str(save_path)
     }
 
