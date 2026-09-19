@@ -11,6 +11,7 @@ def test_validate_provider_keys():
     assert "model" in status
     # Must never expose actual keys
     assert "OPENAI_API_KEY" not in status
+    assert "GROQ_API_KEY" not in status
     assert "GROK_API_KEY" not in status
 
 def test_provider_status_endpoint():
@@ -24,6 +25,6 @@ def test_provider_status_endpoint():
     resp = client.get("/api/v1/provider/status", headers=headers)
     assert resp.status_code == 200
     data = resp.json()
-    assert data["provider"] in ("openai", "grok")
+    assert data["provider"] in ("groq", "openai", "mock", "grok")
     assert "configured" in data
 

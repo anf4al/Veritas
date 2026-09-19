@@ -100,6 +100,18 @@ TRAINING_SPECS: List[Dict[str, Any]] = [
         "department": "Security"
     },
     {
+        "query": "Why was Vendor Atlas classified as high risk, and does our contract allow termination?",
+        "expected_titles": ["Vendor Atlas Risk Assessment 2026", "Vendor Atlas Master Services Agreement"],
+        "hard_negatives": ["Vendor Selection and Due Diligence Matrix", "Intellectual Property Assignment Agreement", "Apex Logistics Service Contract", "Procurement Policy 2026"],
+        "department": "Procurement"
+    },
+    {
+        "query": "Does our contract with Vendor Atlas allow termination?",
+        "expected_titles": ["Vendor Atlas Master Services Agreement"],
+        "hard_negatives": ["Vendor Selection and Due Diligence Matrix", "Intellectual Property Assignment Agreement", "Procurement Policy 2025", "Procurement Policy 2026"],
+        "department": "Legal"
+    },
+    {
         "query": "Which contracts expire within 90 days?",
         "expected_titles": ["Vendor Atlas Master Services Agreement", "Apex Logistics Service Contract"],
         "hard_negatives": ["Procurement Policy 2026", "Supplier SLA Compliance Review 2026"],
@@ -171,6 +183,7 @@ def generate_training_data(db: Session):
                 "version": chunk.document.version,
                 "effective_date": chunk.document.effective_date or "",
                 "page": chunk.page or 1,
+                "section": chunk.section or ""
             }
 
             is_positive = any(exp in title_lower or title_lower in exp for exp in expected_titles)

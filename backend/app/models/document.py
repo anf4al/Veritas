@@ -19,6 +19,7 @@ class Document(Base):
     confidentiality = Column(String(50), nullable=False, default="internal") # public, internal, confidential, restricted
     source = Column(String(255), nullable=True)                      # seed, upload, manual
     checksum = Column(String(64), nullable=True)                     # sha256
+    storage_path = Column(String(500), nullable=True)                 # Persistent path to stored PDF/binary
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Relationships

@@ -98,3 +98,4 @@ def chunk_document_text(
             chunk_index += 1
 
     return chunks
+

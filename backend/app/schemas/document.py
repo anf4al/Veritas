@@ -26,6 +26,8 @@ class DocumentOut(BaseModel):
     status: str
     confidentiality: str
     source: Optional[str] = None
+    storage_path: Optional[str] = None
+    has_file: Optional[bool] = False
     created_at: datetime
     chunk_count: Optional[int] = 0
 

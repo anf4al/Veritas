@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import Depends, HTTPException, status, Header
+from fastapi import Depends, HTTPException, status, Header, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from backend.app.core.database import get_db
@@ -13,10 +13,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=F
 def get_current_user(
     token: Optional[str] = Depends(oauth2_scheme),
     authorization: Optional[str] = Header(None),
+    token_query: Optional[str] = Query(None, alias="token"),
     db: Session = Depends(get_db)
 ) -> User:
-    """Extract and validate JWT token from Bearer header, return active User."""
-    raw_token = token
+    """Extract and validate JWT token from Bearer header or ?token= query param, return active User."""
+    raw_token = token or token_query
     if not raw_token and authorization and authorization.startswith("Bearer "):
         raw_token = authorization.split(" ")[1]
 
@@ -87,3 +88,4 @@ def verify_tenant_access(user: User, company_id: str, db: Session) -> Company:
         )
 
     return company
+

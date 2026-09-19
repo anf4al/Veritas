@@ -102,9 +102,10 @@ def calculate_rerank_features(
     doc_type: str = "",
     version: str = "1.0",
     effective_date: str = "",
-    page: int = 1
+    page: int = 1,
+    section: str = ""
 ) -> List[float]:
-    """Calculate the 10 feature values for XGBoost reranker:
+    """Calculate the 11 feature values for XGBoost reranker:
     0: cosine_similarity
     1: lexical_overlap
     2: bm25_lite
@@ -115,8 +116,10 @@ def calculate_rerank_features(
     7: department_in_query (binary)
     8: page_penalty (reciprocal of page)
     9: query_length_norm
+    10: entity_match (entity-aware presence in chunk text / title / section)
     """
     from backend.app.retrieval.query_expander import expand_query_for_retrieval
+    from backend.app.retrieval.entity import extract_query_entities, compute_entity_presence_score
 
     expanded_query = expand_query_for_retrieval(query)
     q_tokens = extract_tokens(expanded_query)
@@ -134,6 +137,10 @@ def calculate_rerank_features(
     page_pen = 1.0 / math.sqrt(max(1, page))
     q_len_norm = min(1.0, len(q_tokens) / 20.0)
 
+    # 10: Entity match feature
+    query_entities = extract_query_entities(query)
+    entity_score = compute_entity_presence_score(query_entities, chunk_text, title=title, section=section)
+
     return [
         float(cosine_sim),
         float(lex_overlap),
@@ -144,6 +151,7 @@ def calculate_rerank_features(
         float(title_mention),
         float(dept_mention),
         float(page_pen),
-        float(q_len_norm)
+        float(q_len_norm),
+        float(entity_score)
     ]
 

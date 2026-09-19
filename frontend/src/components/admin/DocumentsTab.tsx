@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { DocumentItem, ChunkItem } from "../../types";
 import { api } from "../../services/api";
+import { PdfViewerModal } from "../documents/PdfViewerModal";
 import {
   Upload,
   FileText,
@@ -31,6 +32,9 @@ export const DocumentsTab: React.FC = () => {
   const [uploadConfidentiality, setUploadConfidentiality] = useState("internal");
   const [uploadVersion, setUploadVersion] = useState("1.0");
   const [uploading, setUploading] = useState(false);
+
+  // PDF Viewer state
+  const [viewingPdfDoc, setViewingPdfDoc] = useState<DocumentItem | null>(null);
 
   // Chunk inspection state
   const [inspectDoc, setInspectDoc] = useState<DocumentItem | null>(null);
@@ -194,9 +198,15 @@ export const DocumentsTab: React.FC = () => {
             ) : (
               filteredDocs.map((doc) => (
                 <tr key={doc.id} className="hover:bg-zinc-900/40 transition">
-                  <td className="py-3 px-4 font-medium text-white flex items-center gap-2">
-                    <FileText size={14} className="text-zinc-400 shrink-0" />
-                    <span className="truncate max-w-xs">{doc.title}</span>
+                  <td className="py-3 px-4 font-medium text-white">
+                    <button
+                      onClick={() => setViewingPdfDoc(doc)}
+                      className="flex items-center gap-2 text-left text-white hover:text-blue-400 transition group max-w-xs"
+                      title="Click to view PDF document"
+                    >
+                      <FileText size={14} className="text-zinc-400 group-hover:text-blue-400 shrink-0" />
+                      <span className="truncate underline-offset-2 group-hover:underline">{doc.title}</span>
+                    </button>
                   </td>
                   <td className="py-3 px-4 text-zinc-300">{doc.department}</td>
                   <td className="py-3 px-4 text-zinc-400 uppercase font-mono text-[10px]">{doc.document_type}</td>
@@ -219,6 +229,13 @@ export const DocumentsTab: React.FC = () => {
                   </td>
                   <td className="py-3 px-4 font-mono text-zinc-400">{doc.chunk_count || "-"}</td>
                   <td className="py-3 px-4 text-right space-x-2">
+                    <button
+                      onClick={() => setViewingPdfDoc(doc)}
+                      className="p-1 hover:bg-blue-950/60 text-blue-400 hover:text-blue-300 rounded transition"
+                      title="View PDF Document"
+                    >
+                      <FileText size={14} />
+                    </button>
                     <button
                       onClick={() => handleInspectChunks(doc)}
                       className="p-1 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded transition"
@@ -376,6 +393,23 @@ export const DocumentsTab: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* PDF Document Viewer Modal */}
+      {viewingPdfDoc && (
+        <PdfViewerModal
+          isOpen={!!viewingPdfDoc}
+          onClose={() => setViewingPdfDoc(null)}
+          documentId={viewingPdfDoc.id}
+          title={viewingPdfDoc.title}
+          metadata={{
+            department: viewingPdfDoc.department,
+            version: viewingPdfDoc.version,
+            confidentiality: viewingPdfDoc.confidentiality,
+            effective_date: viewingPdfDoc.effective_date,
+            document_type: viewingPdfDoc.document_type
+          }}
+        />
       )}
     </div>
   );

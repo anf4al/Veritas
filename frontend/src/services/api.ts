@@ -103,6 +103,23 @@ export const api = {
     return res.json();
   },
 
+  getDocumentFileUrl: (documentId: string, page?: number): string => {
+    const token = localStorage.getItem("veritas_token");
+    let url = `${API_BASE}/documents/${documentId}/file`;
+    const params = new URLSearchParams();
+    if (token) params.set("token", token);
+    const qs = params.toString();
+    if (qs) url += `?${qs}`;
+    if (page && page > 0) url += `#page=${page}`;
+    return url;
+  },
+
+  getDocumentFileBlob: async (documentId: string): Promise<Blob> => {
+    const res = await fetch(`${API_BASE}/documents/${documentId}/file`, { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to load physical document file");
+    return res.blob();
+  },
+
   uploadDocument: async (formData: FormData): Promise<any> => {
     const token = localStorage.getItem("veritas_token");
     const headers: HeadersInit = {};

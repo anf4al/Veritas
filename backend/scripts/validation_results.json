@@ -1,0 +1,435 @@
+[
+  {
+    "id": 1,
+    "name": "Current WFH Policy",
+    "query": "What is the current WFH policy?",
+    "company": "asterion",
+    "user": "employee@asterion.demo",
+    "latency_ms": 35561.52,
+    "insufficient_evidence": false,
+    "citations": [
+      {
+        "title": "Work From Home Policy 2026",
+        "page": 1,
+        "relevance_score": 0.9867,
+        "section": "4. Security Requirements",
+        "version": "3.0"
+      },
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.9855,
+        "section": "3.2 Public and Company Holidays",
+        "version": "4.0"
+      },
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.9547,
+        "section": "Chapter 5: Security and Confidentiality",
+        "version": "4.0"
+      },
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.9148,
+        "section": "Chapter 4: Business Expenses and Travel Reimbursement",
+        "version": "4.0"
+      },
+      {
+        "title": "Work From Home Policy 2025",
+        "page": 1,
+        "relevance_score": 0.4079,
+        "section": "2. Equipment Allowance",
+        "version": "2.0"
+      },
+      {
+        "title": "Leave Policy 2026",
+        "page": 1,
+        "relevance_score": 0.0382,
+        "section": "3. Sick Leave and Medical Absence",
+        "version": "3.1"
+      },
+      {
+        "title": "Information Security Policy 2026",
+        "page": 1,
+        "relevance_score": 0.0214,
+        "section": "3. Incident Reporting Windows",
+        "version": "5.0"
+      },
+      {
+        "title": "Reimbursement Policy 2026",
+        "page": 1,
+        "relevance_score": 0.02,
+        "section": "3. Receipt Submission Window",
+        "version": "4.0"
+      }
+    ],
+    "answer": "Based on authorized enterprise documentation:\n\nAccording to [Doc: Work From Home Policy 2026, p.1, 4. Security Requirements, v.3.0]:\n\nWork From Home Policy 2026 (Current Active Version)\n\nSupersedes: AST-HR-POL-2025-002\n\n1. Scope and Eligibility\n\nAll full-time employees at Asterion Technologies are eligible for the hybrid flexible work arrangement following completion of their standard 90-day probationary period.\n\nAdditionally, [Doc: Employee Handbook 2026, p.1, 3.2 Public and Company Holidays, v.4.0] notes:\nAsterion Technologies Comprehensive Employee Handbook 2026\n\nThis policy has been verified against current active enterprise documentation.",
+    "passed": true,
+    "failure_reasons": []
+  },
+  {
+    "id": 2,
+    "name": "Annual Leave Entitlement",
+    "query": "How many annual leave days are employees entitled to?",
+    "company": "asterion",
+    "user": "employee@asterion.demo",
+    "latency_ms": 70.11,
+    "insufficient_evidence": false,
+    "citations": [
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.9919,
+        "section": "Chapter 4: Business Expenses and Travel Reimbursement",
+        "version": "4.0"
+      },
+      {
+        "title": "Leave Policy 2026",
+        "page": 1,
+        "relevance_score": 0.9881,
+        "section": "3. Sick Leave and Medical Absence",
+        "version": "3.1"
+      },
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.9824,
+        "section": "Chapter 5: Security and Confidentiality",
+        "version": "4.0"
+      },
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.9302,
+        "section": "3.2 Public and Company Holidays",
+        "version": "4.0"
+      },
+      {
+        "title": "Work From Home Policy 2025",
+        "page": 1,
+        "relevance_score": 0.915,
+        "section": "2. Equipment Allowance",
+        "version": "2.0"
+      },
+      {
+        "title": "Work From Home Policy 2026",
+        "page": 1,
+        "relevance_score": 0.0495,
+        "section": "4. Security Requirements",
+        "version": "3.0"
+      },
+      {
+        "title": "Disciplinary and Grievance Procedure Ref-016 (2026)",
+        "page": 1,
+        "relevance_score": 0.0221,
+        "section": "Section 3: Roles and Responsibilities",
+        "version": "1.0"
+      },
+      {
+        "title": "Workplace Health and Ergonomics Standard Ref-044 (2026)",
+        "page": 1,
+        "relevance_score": 0.0221,
+        "section": "Section 3: Roles and Responsibilities",
+        "version": "1.4"
+      }
+    ],
+    "answer": "Based on authorized enterprise documentation:\n\nAccording to [Doc: Employee Handbook 2026, p.1, Chapter 4: Business Expenses and Travel Reimbursement, v.4.0]:\n\nual Leave (Vacation)\n\nFull-time employees receive twenty-two (22) days of paid annual leave per calendar year, accruing monthly at a rate of 1.83 days.\n\n3.2 Public and Company Holidays\n\nAsterion Technologies recognizes eleven (11) paid statutory holidays each calendar year:\n\nAdditionally, [Doc: Leave Policy 2026, p.1, 3. Sick Leave and Medical Absence, v.3.1] notes:\nEmployee Annual and Sick Leave Policy 2026\n\nThis policy has been verified against current active enterprise documentation.",
+    "passed": true,
+    "failure_reasons": []
+  },
+  {
+    "id": 3,
+    "name": "WFH Policy Comparison (2025 vs 2026)",
+    "query": "What changed between the 2025 and 2026 WFH policies?",
+    "company": "asterion",
+    "user": "hr@asterion.demo",
+    "latency_ms": 68.66,
+    "insufficient_evidence": false,
+    "citations": [
+      {
+        "title": "Work From Home Policy 2025",
+        "page": 1,
+        "relevance_score": 0.9703,
+        "section": "2. Equipment Allowance",
+        "version": "2.0"
+      },
+      {
+        "title": "Work From Home Policy 2026",
+        "page": 1,
+        "relevance_score": 0.95,
+        "section": "Comparison B",
+        "version": "3.0"
+      },
+      {
+        "title": "Work From Home Policy 2025",
+        "page": 1,
+        "relevance_score": 0.92,
+        "section": "Comparison A",
+        "version": "2.0"
+      },
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.4031,
+        "section": "Chapter 4: Business Expenses and Travel Reimbursement",
+        "version": "4.0"
+      },
+      {
+        "title": "Work From Home Policy 2026",
+        "page": 1,
+        "relevance_score": 0.2062,
+        "section": "4. Security Requirements",
+        "version": "3.0"
+      },
+      {
+        "title": "Employee Handbook 2026",
+        "page": 1,
+        "relevance_score": 0.0497,
+        "section": "3.2 Public and Company Holidays",
+        "version": "4.0"
+      },
+      {
+        "title": "Data Retention Policy 2026",
+        "page": 1,
+        "relevance_score": 0.0234,
+        "section": "1. Statutory Retention Schedules",
+        "version": "2.0"
+      },
+      {
+        "title": "Whistleblower and Anti-Retaliation Policy Ref-045 (2026)",
+        "page": 1,
+        "relevance_score": 0.0195,
+        "section": "Section 3: Roles and Responsibilities",
+        "version": "3.4"
+      }
+    ],
+    "answer": "A comparison between the documented versions reveals key changes:\n\n1. According to [Doc: Work From Home Policy 2025, p.1, 2. Equipment Allowance, v.2.0]:\n  Work From Home Policy 2025 (OUTDATED / SUPERSEDED)\n  1. Core Working Schedule\n  Under the 2025 Policy, employees were required to work on-site three (3) core days per week (Monday, Wednesday, Friday). Remote work was restricted to two days per week.\n\n2. According to [Doc: Employee Handbook 2026, p.1, Chapter 4: Business Expenses and Travel Reimbursement, v.4.0]:\n  ual Leave (Vacation)\n  Full-time employees receive twenty-two (22) days of paid annual leave per calendar year, accruing monthly at a rate of 1.83 days.\n  3.2 Public and Company Holidays\n\nSummary of Changes: The updated documentation establishes new procedural and operational requirements superseding the prior provisions.",
+    "passed": true,
+    "failure_reasons": []
+  },
+  {
+    "id": 4,
+    "name": "Vendor Atlas Risk Classification",
+    "query": "Why was Vendor Atlas classified as high risk?",
+    "company": "asterion",
+    "user": "ops@asterion.demo",
+    "latency_ms": 119.42,
+    "insufficient_evidence": false,
+    "citations": [
+      {
+        "title": "Vendor Atlas Master Services Agreement",
+        "page": 1,
+        "relevance_score": 0.9874,
+        "section": "Section 14.2: Termination for Cause and SLA Default",
+        "version": "2.0"
+      },
+      {
+        "title": "Procurement Policy 2025",
+        "page": 1,
+        "relevance_score": 0.9764,
+        "section": "2. High Risk Definition",
+        "version": "1.8"
+      },
+      {
+        "title": "Vendor Atlas Risk Assessment 2026",
+        "page": 1,
+        "relevance_score": 0.9,
+        "section": "Performance Evaluation",
+        "version": "1.0"
+      },
+      {
+        "title": "Vendor Atlas Master Services Agreement",
+        "page": 1,
+        "relevance_score": 0.9,
+        "section": "Performance Evaluation",
+        "version": "2.0"
+      },
+      {
+        "title": "Vendor Atlas Risk Assessment 2026",
+        "page": 1,
+        "relevance_score": 0.8964,
+        "section": "3. Recommended Action",
+        "version": "1.0"
+      },
+      {
+        "title": "Apex Logistics Service Contract",
+        "page": 1,
+        "relevance_score": 0.2039,
+        "section": "Section 3: Term and Renewal",
+        "version": "1.5"
+      },
+      {
+        "title": "Quarterly Procurement Spend Analysis Ref-023 (2024)",
+        "page": 1,
+        "relevance_score": 0.0546,
+        "section": "Section 4: Document Governance and Historical Versioning",
+        "version": "2.0"
+      },
+      {
+        "title": "Vendor Performance Report Q4 2025",
+        "page": 1,
+        "relevance_score": 0.0513,
+        "section": "3. Other Suppliers",
+        "version": "1.0"
+      }
+    ],
+    "answer": "Based on authorized enterprise documentation:\n\nAccording to [Doc: Vendor Atlas Master Services Agreement, p.1, Section 14.2: Termination for Cause and SLA Default, v.2.0]:\n\nMaster Services Agreement: Asterion Technologies & Vendor Atlas\n\nContract ID: AST-MSA-2023-089\n\nTerm: 36 Months (Expires April 1, 2026)\n\nSection 14: Termination Provisions\n\nAdditionally, [Doc: Procurement Policy 2025, p.1, 2. High Risk Definition, v.1.8] notes:\nEnterprise Procurement Policy 2025 (OUTDATED)\n\nThis policy has been verified against current active enterprise documentation.",
+    "passed": true,
+    "failure_reasons": []
+  },
+  {
+    "id": 5,
+    "name": "Vendor Atlas Contract Termination",
+    "query": "Does our contract with Vendor Atlas allow termination?",
+    "company": "asterion",
+    "user": "ops@asterion.demo",
+    "latency_ms": 104.02,
+    "insufficient_evidence": false,
+    "citations": [
+      {
+        "title": "Vendor Atlas Master Services Agreement",
+        "page": 1,
+        "relevance_score": 0.9874,
+        "section": "Section 14.2: Termination for Cause and SLA Default",
+        "version": "2.0"
+      },
+      {
+        "title": "Procurement Policy 2025",
+        "page": 1,
+        "relevance_score": 0.9764,
+        "section": "2. High Risk Definition",
+        "version": "1.8"
+      },
+      {
+        "title": "Vendor Atlas Risk Assessment 2026",
+        "page": 1,
+        "relevance_score": 0.9,
+        "section": "Performance Evaluation",
+        "version": "1.0"
+      },
+      {
+        "title": "Vendor Atlas Master Services Agreement",
+        "page": 1,
+        "relevance_score": 0.9,
+        "section": "Performance Evaluation",
+        "version": "2.0"
+      },
+      {
+        "title": "Vendor Atlas Risk Assessment 2026",
+        "page": 1,
+        "relevance_score": 0.8964,
+        "section": "3. Recommended Action",
+        "version": "1.0"
+      },
+      {
+        "title": "Apex Logistics Service Contract",
+        "page": 1,
+        "relevance_score": 0.2039,
+        "section": "Section 3: Term and Renewal",
+        "version": "1.5"
+      },
+      {
+        "title": "Quarterly Procurement Spend Analysis Ref-023 (2024)",
+        "page": 1,
+        "relevance_score": 0.0546,
+        "section": "Section 4: Document Governance and Historical Versioning",
+        "version": "2.0"
+      },
+      {
+        "title": "Vendor Performance Report Q4 2025",
+        "page": 1,
+        "relevance_score": 0.0513,
+        "section": "3. Other Suppliers",
+        "version": "1.0"
+      }
+    ],
+    "answer": "Based on the enterprise agreement records:\n\nAccording to [Doc: Vendor Atlas Master Services Agreement, p.1, Section 14.2: Termination for Cause and SLA Default, v.2.0]:\n\nMaster Services Agreement: Asterion Technologies & Vendor Atlas\n\nContract ID: AST-MSA-2023-089\n\nTerm: 36 Months (Expires April 1, 2026)\n\nSection 14: Termination Provisions\n\nAll contractual rights and termination conditions are governed strictly by the cited terms above.",
+    "passed": true,
+    "failure_reasons": []
+  },
+  {
+    "id": 6,
+    "name": "Vendor Atlas Dual-Query (Risk + Termination)",
+    "query": "Why was Vendor Atlas classified as high risk, and does our contract allow termination?",
+    "company": "asterion",
+    "user": "ops@asterion.demo",
+    "latency_ms": 105.88,
+    "insufficient_evidence": false,
+    "citations": [
+      {
+        "title": "Vendor Atlas Master Services Agreement",
+        "page": 1,
+        "relevance_score": 0.9874,
+        "section": "Section 14.2: Termination for Cause and SLA Default",
+        "version": "2.0"
+      },
+      {
+        "title": "Procurement Policy 2025",
+        "page": 1,
+        "relevance_score": 0.9764,
+        "section": "2. High Risk Definition",
+        "version": "1.8"
+      },
+      {
+        "title": "Vendor Atlas Risk Assessment 2026",
+        "page": 1,
+        "relevance_score": 0.9,
+        "section": "Performance Evaluation",
+        "version": "1.0"
+      },
+      {
+        "title": "Vendor Atlas Master Services Agreement",
+        "page": 1,
+        "relevance_score": 0.9,
+        "section": "Performance Evaluation",
+        "version": "2.0"
+      },
+      {
+        "title": "Vendor Atlas Risk Assessment 2026",
+        "page": 1,
+        "relevance_score": 0.8964,
+        "section": "3. Recommended Action",
+        "version": "1.0"
+      },
+      {
+        "title": "Apex Logistics Service Contract",
+        "page": 1,
+        "relevance_score": 0.2039,
+        "section": "Section 3: Term and Renewal",
+        "version": "1.5"
+      },
+      {
+        "title": "Quarterly Procurement Spend Analysis Ref-023 (2024)",
+        "page": 1,
+        "relevance_score": 0.0546,
+        "section": "Section 4: Document Governance and Historical Versioning",
+        "version": "2.0"
+      },
+      {
+        "title": "Vendor Performance Report Q4 2025",
+        "page": 1,
+        "relevance_score": 0.0513,
+        "section": "3. Other Suppliers",
+        "version": "1.0"
+      }
+    ],
+    "answer": "Based on comprehensive enterprise records:\n\n1. Risk Assessment Summary [Doc: Vendor Atlas Risk Assessment 2026, p.1, Performance Evaluation, v.1.0]:\nSupplier Risk Assessment: Vendor Atlas\n\nVendor: Vendor Atlas Systems LLC\n\nContract Reference: AST-MSA-2023-089\n\n2. Contractual & Termination Rights [Doc: Vendor Atlas Master Services Agreement, p.1, Section 14.2: Termination for Cause and SLA Default, v.2.0]:\nMaster Services Agreement: Asterion Technologies & Vendor Atlas\n\nContract ID: AST-MSA-2023-089\n\nTerm: 36 Months (Expires April 1, 2026)\n\nConclusion: The vendor was designated high risk due to documented audit and vulnerability concerns, and contract termination provisions may be exercised according to the cited clauses.",
+    "passed": true,
+    "failure_reasons": []
+  },
+  {
+    "id": 7,
+    "name": "Vendor Atlas Meridian Negative Isolation",
+    "query": "Why was Vendor Atlas classified as high risk, and does our contract allow termination?",
+    "company": "meridian",
+    "user": "compliance@meridian.demo",
+    "latency_ms": 5370.62,
+    "insufficient_evidence": true,
+    "citations": [],
+    "answer": "I couldn't find sufficient authorized information in the enterprise knowledge base to answer that reliably.",
+    "passed": true,
+    "failure_reasons": []
+  }
+]

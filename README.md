@@ -183,3 +183,4 @@ Veritas/
 - [x] Multi-step agent questions (e.g. Vendor Atlas SLA breach vs. contract termination clause) coordinate multiple tools.
 - [x] OpenTelemetry-compatible traces and latency metrics are tracked in the Observability tab.
 - [x] Evaluation benchmarks calculate empirical Recall@5/10/20, groundedness, and XGBoost ranking improvements.
+

@@ -27,9 +27,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(u);
       if (u.companies && u.companies.length > 0) {
         const savedCompId = localStorage.getItem("veritas_active_company_id");
-        const match = u.companies.find(c => c.id === savedCompId) || u.companies[0];
-        setActiveCompany(match);
-        localStorage.setItem("veritas_active_company_id", match.id);
+        // Authorized companies are the absolute source of truth.
+        // If a savedCompId exists and is in the user's authorized companies, preserve it.
+        // Otherwise, prioritize the authoritative active_company_id from the backend profile.
+        let targetComp = u.companies.find(c => c.id === savedCompId);
+        if (!targetComp && u.active_company_id) {
+          targetComp = u.companies.find(c => c.id === u.active_company_id);
+        }
+        if (!targetComp) {
+          targetComp = u.companies[0];
+        }
+        setActiveCompany(targetComp);
+        localStorage.setItem("veritas_active_company_id", targetComp.id);
+      } else {
+        setActiveCompany(null);
+        localStorage.removeItem("veritas_active_company_id");
       }
     } catch {
       logout();
@@ -47,6 +59,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [token]);
 
   const login = async (username: string, password: string, company_id?: string) => {
+    // If no explicit company_id is provided, clear stale persisted selection
+    // to prevent cross-session or previous user tenant bleed
+    if (!company_id) {
+      localStorage.removeItem("veritas_active_company_id");
+    }
     const data = await api.login(username, password, company_id);
     localStorage.setItem("veritas_token", data.access_token);
     setToken(data.access_token);
@@ -68,12 +85,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const switchActiveCompany = async (companyId: string) => {
+    // Verify target company is authorized for current user
+    if (user && user.companies && !user.companies.some(c => c.id === companyId)) {
+      throw new Error(`Unauthorized company ID: ${companyId}`);
+    }
     const res = await api.switchCompany(companyId);
     if (res.new_token) {
       localStorage.setItem("veritas_token", res.new_token);
       setToken(res.new_token);
     }
     localStorage.setItem("veritas_active_company_id", companyId);
+    if (user?.companies) {
+      const match = user.companies.find(c => c.id === companyId);
+      if (match) {
+        setActiveCompany(match);
+      }
+    }
     await refreshProfile();
   };
 

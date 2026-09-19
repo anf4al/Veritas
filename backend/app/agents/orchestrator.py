@@ -1,3 +1,4 @@
+import re
 import time
 import asyncio
 import logging
@@ -27,35 +28,74 @@ logger = logging.getLogger("veritas.rag.orchestrator")
 def evaluate_evidence_sufficiency(query: str, top_evidence: List[Dict[str, Any]]) -> Tuple[str, str]:
     """Evaluate evidence sufficiency returning (status, reason).
     status: 'SUFFICIENT' | 'WEAK' | 'INSUFFICIENT'
+    Considers multiple independent signals:
+    - XGBoost reranker score (primary relevance signal)
+    - Semantic vector similarity
+    - Named entity presence (query entities must appear in evidence)
+    - Document version / recency
+    - Query intent (comparisons require multi-version representation)
     """
     if not top_evidence:
         return "INSUFFICIENT", "No evidence chunks were retrieved or authorized for this query."
+
+    from backend.app.retrieval.entity import extract_query_entities, entity_present_in_text
+
+    # 1. Named Entity Presence Check:
+    # For entity-specific queries (e.g. 'Vendor Atlas'), semantic similarity alone must NEVER be sufficient.
+    query_entities = extract_query_entities(query)
+    if query_entities:
+        matched_entities = set()
+        for entity in query_entities:
+            for ev in top_evidence:
+                combined_context = f"{ev.get('title', '')} {ev.get('section', '')} {ev.get('text', '')}"
+                if entity_present_in_text(entity, combined_context):
+                    matched_entities.add(entity)
+                    break
+
+        missing_entities = [e for e in query_entities if e not in matched_entities]
+        if missing_entities:
+            return "INSUFFICIENT", (
+                f"Required entity '{', '.join(missing_entities)}' was not found in any authorized "
+                f"evidence for this tenant."
+            )
 
     max_sim = max((float(e.get("similarity_score", 0.0)) for e in top_evidence), default=0.0)
     max_rerank = max((float(e.get("rerank_score", 0.0)) for e in top_evidence), default=0.0)
     chunk_count = len(top_evidence)
 
-    # Check comparison queries
+    # 2. Check comparison queries:
     q_lower = query.lower()
     is_comparison = any(k in q_lower for k in ["compare", "changed between", "difference", "versus", " vs "])
     if is_comparison:
-        versions = {str(e.get("version", "")) for e in top_evidence}
-        titles = {str(e.get("title", "")) for e in top_evidence}
-        has_multi_version = len(versions) > 1 or len(titles) > 1
+        versions = {str(e.get("version", "")) for e in top_evidence if e.get("version")}
+        titles = {str(e.get("title", "")) for e in top_evidence if e.get("title")}
+        years = set(re.findall(r"\b(202[4-6])\b", " ".join(titles) + " " + " ".join(str(e.get("text", "")) for e in top_evidence)))
+        has_multi_version = len(versions) > 1 or len(years) > 1 or len(titles) > 1
         if (max_sim >= 0.25 or max_rerank >= 0.25) and has_multi_version:
             return "SUFFICIENT", f"Multi-source comparison evidence found ({', '.join(titles)}), max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}"
         elif max_sim >= 0.20 or max_rerank >= 0.20:
             return "WEAK", f"Comparison query with partial version representation ({', '.join(titles)}), max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}"
+        else:
+            return "INSUFFICIENT", f"Insufficient comparative evidence found across versions (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f})"
 
-    # General queries:
-    # A single strong chunk (sim >= 0.28 or rerank >= 0.30) is sufficient
-    # Or moderate similarity/rerank (max_sim >= 0.22 or max_rerank >= 0.22)
-    if max_sim >= 0.28 or max_rerank >= 0.30:
+    # 3. General Queries - Multi-signal Evaluation:
+    # If the reranker explicitly rejects the candidate chunks (< 0.18),
+    # broad semantic similarity MUST NOT override it.
+    if max_rerank > 0.0 and max_rerank < 0.18:
+        return "INSUFFICIENT", f"Reranker determined candidate evidence is non-responsive (max_rerank={max_rerank:.4f}, max_sim={max_sim:.4f})"
+
+    # High confidence: strong reranker + corroborating semantic similarity or high rerank
+    if (max_rerank >= 0.30 and max_sim >= 0.22) or max_rerank >= 0.60 or (max_rerank == 0.0 and max_sim >= 0.40):
         return "SUFFICIENT", f"Strong evidence identified (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}, count={chunk_count})"
-    elif max_sim >= 0.22 or max_rerank >= 0.22:
+
+    # Moderate confidence
+    elif (max_rerank >= 0.20 and max_sim >= 0.20) or max_sim >= 0.30:
         return "SUFFICIENT", f"Sufficient relevance identified (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}, count={chunk_count})"
-    elif max_sim >= 0.16 or max_rerank >= 0.16:
+
+    # Weak / partial confidence
+    elif max_rerank >= 0.18 or max_sim >= 0.18:
         return "WEAK", f"Low confidence evidence (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f}, count={chunk_count})"
+
     else:
         return "INSUFFICIENT", f"All evidence chunks below minimum thresholds (max_sim={max_sim:.4f}, max_rerank={max_rerank:.4f})"
 

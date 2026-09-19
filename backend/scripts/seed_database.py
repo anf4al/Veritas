@@ -185,6 +185,10 @@ def seed_database(reset: bool = True):
     db.close()
     print(f"Database seeding completed! Ingested {ingested_count} new documents.")
 
+    # Automatically generate and link authentic enterprise PDFs
+    from backend.scripts.generate_seed_pdfs import generate_all_seed_pdfs
+    generate_all_seed_pdfs()
+
 if __name__ == "__main__":
     seed_database()
 

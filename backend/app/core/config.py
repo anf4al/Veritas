@@ -8,13 +8,16 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
 ENV_FILE = ROOT_DIR / ".env"
 
 class Settings(BaseSettings):
-    # Required .env settings per spec (Part 5)
-    AI_PROVIDER: str = "openai"
-    GROK_API_KEY: str = ""
+    # Required .env settings
+    AI_PROVIDER: str = "groq"
+    GROQ_API_KEY: str = ""
+    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
     OPENAI_API_KEY: str = ""
-
-    # Centralized Model names (Part 5)
     OPENAI_MODEL: str = "gpt-4o-mini"
+
+    # Backward compatibility for deprecated Grok settings
+    GROK_API_KEY: str = ""
     GROK_MODEL: str = "grok-2-latest"
     GROK_BASE_URL: str = "https://api.x.ai/v1"
 
@@ -27,6 +30,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = f"sqlite:///{ROOT_DIR / 'veritas.db'}"
     SEED_DATA_DIR: Path = ROOT_DIR / "data" / "seed"
     UPLOADS_DIR: Path = ROOT_DIR / "data" / "uploads"
+    STORAGE_DIR: Path = ROOT_DIR / "data" / "storage"
 
     # RAG defaults per spec (Part 4)
     EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
@@ -52,11 +56,16 @@ def validate_provider_keys() -> dict:
     Does NOT print or return the API key.
     """
     provider = settings.AI_PROVIDER.lower().strip()
-    if provider == "openai":
+    if provider == "groq":
+        has_key = bool(settings.GROQ_API_KEY and settings.GROQ_API_KEY.strip())
+        return {"provider": "groq", "configured": has_key, "model": settings.GROQ_MODEL}
+    elif provider == "openai":
         has_key = bool(settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.strip())
         return {"provider": "openai", "configured": has_key, "model": settings.OPENAI_MODEL}
+    elif provider == "mock":
+        return {"provider": "mock", "configured": True, "model": "Mock Grounded Generator"}
     elif provider == "grok":
         has_key = bool(settings.GROK_API_KEY and settings.GROK_API_KEY.strip())
         return {"provider": "grok", "configured": has_key, "model": settings.GROK_MODEL}
     else:
-        return {"provider": provider, "configured": False, "error": f"Unsupported AI_PROVIDER: '{provider}'. Must be 'openai' or 'grok'."}
+        return {"provider": provider, "configured": False, "error": f"Unsupported AI_PROVIDER: '{provider}'. Must be 'groq', 'openai', or 'mock'."}

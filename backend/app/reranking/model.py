@@ -53,7 +53,8 @@ class XGBoostReranker:
                 doc_type=c.document_type,
                 version=c.version,
                 effective_date=c.effective_date or "",
-                page=c.page
+                page=c.page,
+                section=c.section or ""
             )
             feature_matrix.append(feats)
 

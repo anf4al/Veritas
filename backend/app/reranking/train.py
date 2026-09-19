@@ -36,7 +36,8 @@ def train_reranker_model(training_data: List[Dict[str, Any]], save_path: Path = 
             doc_type=item.get("doc_type", ""),
             version=item.get("version", "1.0"),
             effective_date=item.get("effective_date", ""),
-            page=item.get("page", 1)
+            page=item.get("page", 1),
+            section=item.get("section", "")
         )
         X_list.append(feats)
         y_list.append(item["label"])

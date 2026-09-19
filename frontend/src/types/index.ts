@@ -89,6 +89,8 @@ export interface DocumentItem {
   status: string;
   confidentiality: string;
   source?: string;
+  storage_path?: string;
+  has_file?: boolean;
   created_at: string;
   chunk_count?: number;
 }
